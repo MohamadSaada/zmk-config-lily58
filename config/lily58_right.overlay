@@ -1,0 +1,58 @@
+/*
+ * Right half = peripheral, with the PIM447 attached.
+ *
+ * The nice!view already uses the OLED-header pins (P0.17 / P0.20) as SPI
+ * on the spi0 peripheral, so the trackball gets its own I2C bus (i2c1)
+ * on the rotary-encoder footprint pins.
+ *
+ *   PIM447 SDA  -> encoder pad B = pro_micro 20 (F5) = P0.29
+ *   PIM447 SCL  -> encoder pad A = pro_micro 21 (F4) = P0.31
+ *   PIM447 GND  -> encoder pad C (GND)
+ *   PIM447 INT  -> pro_micro 4 (D4) = P0.22   (extra wire)
+ *   PIM447 3-5V -> VCC                       (extra wire)
+ *
+ * If your SDA/SCL are the other way round, swap 29 and 31 in BOTH psels blocks.
+ */
+#include "trackball.dtsi"
+
+&pinctrl {
+    pim447_i2c_default: pim447_i2c_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 29)>,
+                    <NRF_PSEL(TWIM_SCL, 0, 31)>;
+            bias-pull-up;
+        };
+    };
+
+    pim447_i2c_sleep: pim447_i2c_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 29)>,
+                    <NRF_PSEL(TWIM_SCL, 0, 31)>;
+            low-power-enable;
+        };
+    };
+};
+
+&i2c1 {
+    compatible = "nordic,nrf-twim";
+    status = "okay";
+    clock-frequency = <I2C_BITRATE_STANDARD>;
+    pinctrl-0 = <&pim447_i2c_default>;
+    pinctrl-1 = <&pim447_i2c_sleep>;
+    pinctrl-names = "default", "sleep";
+
+    pim447: pim447@a {
+        compatible = "zmk,pimoroni-pim447";
+        reg = <0x0a>;
+        int-gpios = <&gpio0 22 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    };
+};
+
+&trackball_split {
+    device = <&pim447>;
+};
+
+/* The encoder footprint's pins are now the trackball's I2C bus: keep the EC11 driver off them */
+&left_encoder {
+    status = "disabled";
+};

@@ -1,0 +1,6 @@
+/* Left half = central: receives trackball events and sends them to the computer */
+#include "trackball.dtsi"
+
+&trackball_listener {
+    status = "okay";
+};
