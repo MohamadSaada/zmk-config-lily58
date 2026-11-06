@@ -4,7 +4,7 @@ manifest:
       url-base: https://github.com/zmkfirmware
     # Your fork of t0bybr/pim447 with the CMakeLists.txt fix applied
     - name: myfork
-      url-base: https://github.com/YOUR-GITHUB-USERNAME
+      url-base: https://github.com/MohamadSaada
   projects:
     - name: zmk
       remote: zmkfirmware
